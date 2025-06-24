@@ -1,0 +1,2 @@
+# om_systems_custom_settings_configurator
+OM System Custom Settings Configurator application
