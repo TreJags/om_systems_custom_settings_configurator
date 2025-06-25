@@ -99,9 +99,17 @@ ipcMain.handle('get-default-config', () => {
       defaultConfig[menuName] = {};
 
       // For each setting in the menu, create an empty object
-      menuStructure[menuName].forEach(settingName => {
-        defaultConfig[menuName][settingName] = {};
-      });
+      if (Array.isArray(menuStructure[menuName])) {
+        // Handle array of settings
+        menuStructure[menuName].forEach(settingName => {
+          defaultConfig[menuName][settingName] = {};
+        });
+      } else if (typeof menuStructure[menuName] === 'object') {
+        // Handle object of settings
+        for (const settingName in menuStructure[menuName]) {
+          defaultConfig[menuName][settingName] = {};
+        }
+      }
     }
 
     return defaultConfig;

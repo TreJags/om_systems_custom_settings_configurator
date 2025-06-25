@@ -1,7 +1,103 @@
 {
-  "Menu 1": ["Custom Mode", "Button Settings"],
-  "Menu 2": ["Focus BKT", "ART BKT", "ISO BKT", "Drive", "C-AF Sensitivity"],
-  "Menu 3": ["Live ND Shooting", "Focus Stacking", "Flicker Scan", "Face& Eye Detection"],
-  "Menu 4": ["Interval Shooting", "Sequential Shooting Settings", "Subject Detection"],
-  "Menu 5": ["Starry Sky AF Setting", "Noise Reduction", "Card Formatting", "AF Focus Adjustment"]
+  "Basic Settings / Image Quality": {
+    "Custom Mode": {
+      "C1": {
+        "Recall": ["Yes", "No"],
+        "Assign": ["Set", "Reset"],
+        "Save Settings": ["Hold", "Reset"]
+      },
+      "C2": {
+        "Recall": ["Yes", "No"],
+        "Assign": ["Set", "Reset"],
+        "Save Settings": ["Hold", "Reset"]
+      },
+      "C3": {
+        "Recall": ["Yes", "No"],
+        "Assign": ["Set", "Reset"],
+        "Save Settings": ["Hold", "Reset"]
+      },
+      "C4": {
+        "Recall": ["Yes", "No"],
+        "Assign": ["Set", "Reset"],
+        "Save Settings": ["Hold", "Reset"]
+      }
+    },
+    "Photo Quality": {
+      "Card 1": ["RAW"],
+      "Card 2": ["LSF"]
+    },
+    "Photo Quality Detailed Settings": [
+      "Settings One L-SF",
+      "Settings Two L-F",
+      "Settings Three L-N",
+      "Settings Four M1-N"
+    ],
+    "Image Aspect": ["4:3", "16:9", "3:2", "1:1", "3:4"],
+    "Image Review": ["Auto", "Off", "0.3s", "0.5s", "1s", "2s"],
+    "Shading Compensation": ["Off", "On"]
+  },
+  "Picture Mode / White Balance": {
+    "Picture Mode": {
+      "Modes": [
+        "iEnhance", "vivid", "natural", "muted", "portrait", "monochrome",
+        "Custom", "underwater", "color creator", "art 1", "art 2", "art 3", "art 4", "art 5"
+      ],
+      "Sharpness": [-2, -1, 0, 1, 2],
+      "Contrast": [-2, -1, 0, 1, 2],
+      "Saturation": [-2, -1, 0, 1, 2],
+      "Gradation": ["Auto", "Normal", "High", "Low"]
+    },
+    "Picture Mode Settings": [
+      "vivid", "muted", "portrait", "monochrome", "Custom", "underwater",
+      "soft focus", "grainy film", "pin hole", "diorama", "dramatic tone",
+      "key line", "watercolor", "vintage", "partial color", "bleach bypass", "instant film"
+    ],
+    "White Balance": {
+      "Presets": [
+        "Auto", "Sunny 5300K", "Shadow 7500K", "Cloudy 6000K",
+        "Incandescent 3000K", "Fluorescent 4000K", "Underwater", "WB Flash 5500K"
+      ],
+      "Custom WB": {
+        "Custom WB 1": ["CWB1", "CWB Set", "WB +/-"],
+        "Custom WB 2": [],
+        "Custom WB 3": [],
+        "Custom WB 4": [],
+        "Custom WB": []
+      }
+    },
+    "White Balance All": ["Settings"],
+    "WB Keep Warm Color": ["On", "Off"],
+    "Flash WB": ["Off", "WB Auto", "WB Flash 5500K"],
+    "Color Space": ["sRGB", "Adobe RGB"]
+  },
+  "ISO / Noise Reduction": {
+    "ISO-A Upper/Default": ["Upper ISO", "Default ISO"],
+    "ISO-A Lowest S/S": ["Auto", "Custom"],
+    "ISO-Auto": ["P/A/S", "P/A/S/M"],
+    "ISO Step": ["1/3EV", "1EV"],
+    "Noise Filter": ["Off", "Low", "Standard", "High"],
+    "Low ISO Processing": ["Drive Priority", "Detail Priority"],
+    "Noise Reduction": ["Off", "On", "Auto"]
+  },
+  "Exposure": {
+    "Flicker Scan": ["Off", "On"],
+    "EV Step": ["1/3EV", "1/2EV", "1EV"],
+    "Exposure Shift": ["Full", "Mid", "Spot"]
+  },
+  "Metering": {
+    "Metering": ["Spot", "Full"],
+    "Metering During AEL": ["Auto", "Mid", "Spot"],
+    "AEL Auto Reset": ["Yes", "No"],
+    "AEL by Half-Pressing": ["S-AF Only", "Yes", "No"],
+    "Metering During High-Speed Shooting": ["Yes", "No"],
+    "Spot Metering": ["Spot", "Highlight", "Shadow"]
+  },
+  "Flash": {
+    "Flash RC Mode": [],
+    "X-Sync": [],
+    "Slow Limit": [],
+    "Flash Exposure + Exposure": ["On", "Off"],
+    "Balanced Flash Metering": ["Off", "On"],
+    "Flash Mode Settings": []
+  }
 }

@@ -159,7 +159,9 @@ function renderSettingsTable() {
 
         // Create setting rows for this menu based on menu structure
         const settingNames = menuStructure[menuName];
-        for (const settingName of settingNames) {
+
+        // Function to process a setting and create a row for it
+        const processSettingName = (settingName) => {
             const settingRow = document.createElement('tr');
             settingRow.className = 'setting-row';
             settingRow.dataset.menu = menuName;
@@ -191,6 +193,10 @@ function renderSettingsTable() {
                 }
             }
 
+            // Check if this setting has selectable options (array of strings/numbers)
+            const settingOptions = getSettingOptions(menuName, settingName);
+            const hasOptions = settingOptions && settingOptions.length > 0;
+
             // Add value cells
             for (let i = 0; i < 4; i++) {
                 const cell = document.createElement('td');
@@ -198,17 +204,67 @@ function renderSettingsTable() {
                 cell.dataset.setting = settingName;
                 cell.dataset.column = i;
 
-                // Make cell editable
-                cell.contentEditable = 'true';
-                cell.classList.add('editable');
+                if (hasOptions) {
+                    // Create radio buttons for each option
+                    const selectedValue = rawValues[i] || '';
 
-                // Set the cell content
-                cell.textContent = settingValues[i];
+                    // Create a container for the radio buttons
+                    const radioContainer = document.createElement('div');
+                    radioContainer.className = 'radio-container';
 
-                // Add event listeners for editing
-                cell.addEventListener('focus', onCellFocus);
-                cell.addEventListener('blur', onCellBlur);
-                cell.addEventListener('keydown', onCellKeyDown);
+                    settingOptions.forEach(option => {
+                        const radioId = `radio-${menuName}-${settingName}-${i}-${option}`.replace(/\s+/g, '-');
+
+                        const radioLabel = document.createElement('label');
+                        radioLabel.className = 'radio-label';
+                        radioLabel.htmlFor = radioId;
+
+                        const radioInput = document.createElement('input');
+                        radioInput.type = 'radio';
+                        radioInput.name = `radio-${menuName}-${settingName}-${i}`;
+                        radioInput.id = radioId;
+                        radioInput.value = option;
+                        radioInput.checked = selectedValue === option;
+
+                        radioInput.addEventListener('change', () => {
+                            if (radioInput.checked) {
+                                // Update the configuration when a radio button is selected
+                                updateConfigurationValue(cell, option);
+                            }
+                        });
+
+                        // Prevent click event from propagating to parent elements (like menu row)
+                        radioLabel.addEventListener('click', (event) => {
+                            event.stopPropagation();
+                        });
+
+                        // Also prevent propagation on the radio input itself
+                        radioInput.addEventListener('click', (event) => {
+                            event.stopPropagation();
+                        });
+
+                        const optionText = document.createElement('span');
+                        optionText.textContent = option;
+
+                        radioLabel.appendChild(radioInput);
+                        radioLabel.appendChild(optionText);
+                        radioContainer.appendChild(radioLabel);
+                    });
+
+                    cell.appendChild(radioContainer);
+                } else {
+                    // Make cell editable for non-option settings
+                    cell.contentEditable = 'true';
+                    cell.classList.add('editable');
+
+                    // Set the cell content
+                    cell.textContent = settingValues[i];
+
+                    // Add event listeners for editing
+                    cell.addEventListener('focus', onCellFocus);
+                    cell.addEventListener('blur', onCellBlur);
+                    cell.addEventListener('keydown', onCellKeyDown);
+                }
 
                 if (hasDifferences) {
                     cell.classList.add('different');
@@ -217,6 +273,50 @@ function renderSettingsTable() {
             }
 
             tableBody.appendChild(settingRow);
+        };
+
+        // Handle different types of menu structures
+        if (Array.isArray(settingNames)) {
+            // If it's an array, process each setting name directly
+            for (const settingName of settingNames) {
+                processSettingName(settingName);
+            }
+        } else if (typeof settingNames === 'object') {
+            // If it's an object, process each key as a setting name
+            for (const settingName in settingNames) {
+                processSettingName(settingName);
+
+                // If the setting is itself an object or array, process its children recursively
+                if (typeof settingNames[settingName] === 'object' && settingNames[settingName] !== null) {
+                    if (Array.isArray(settingNames[settingName])) {
+                        // Handle array of sub-settings
+                        for (const subSetting of settingNames[settingName]) {
+                            if (typeof subSetting === 'string' || typeof subSetting === 'number') {
+                                processSettingName(`${settingName} - ${subSetting}`);
+                            }
+                        }
+                    } else {
+                        // Handle object of sub-settings
+                        for (const subSettingName in settingNames[settingName]) {
+                            processSettingName(`${settingName} - ${subSettingName}`);
+
+                            // Handle deeper nesting (e.g., Custom Mode -> C1 -> Recall)
+                            if (typeof settingNames[settingName][subSettingName] === 'object' && 
+                                settingNames[settingName][subSettingName] !== null) {
+                                if (Array.isArray(settingNames[settingName][subSettingName])) {
+                                    // Skip if it's an array of options, as these will be handled by radio buttons
+                                    continue;
+                                } else {
+                                    // Process third-level nested objects
+                                    for (const subSubSettingName in settingNames[settingName][subSettingName]) {
+                                        processSettingName(`${settingName} - ${subSettingName} - ${subSubSettingName}`);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -319,31 +419,83 @@ function onCellKeyDown(event) {
     }
 }
 
+// Get selectable options for a setting
+function getSettingOptions(menuName, settingName) {
+    // Check if the setting name contains a parent-child relationship (e.g., "Parent - Child")
+    if (settingName.includes(' - ')) {
+        const parts = settingName.split(' - ');
+
+        // Handle different levels of nesting
+        if (parts.length === 2) {
+            const parentSetting = parts[0];
+            const childSetting = parts[1];
+
+            // Check if the parent setting exists in the menu structure
+            if (menuStructure[menuName] && menuStructure[menuName][parentSetting]) {
+                // If the child setting is an array, return it as options
+                if (Array.isArray(menuStructure[menuName][parentSetting][childSetting])) {
+                    return menuStructure[menuName][parentSetting][childSetting];
+                }
+            }
+        } else if (parts.length === 3) {
+            // Handle deeper nesting (e.g., "Custom Mode - C1 - Recall")
+            const grandparentSetting = parts[0];
+            const parentSetting = parts[1];
+            const childSetting = parts[2];
+
+            // Check if the grandparent and parent settings exist in the menu structure
+            if (menuStructure[menuName] && 
+                menuStructure[menuName][grandparentSetting] && 
+                menuStructure[menuName][grandparentSetting][parentSetting]) {
+                // If the child setting is an array, return it as options
+                if (Array.isArray(menuStructure[menuName][grandparentSetting][parentSetting][childSetting])) {
+                    return menuStructure[menuName][grandparentSetting][parentSetting][childSetting];
+                }
+            }
+        }
+    } else {
+        // Check if the setting exists directly in the menu structure
+        if (menuStructure[menuName] && Array.isArray(menuStructure[menuName][settingName])) {
+            return menuStructure[menuName][settingName];
+        }
+    }
+
+    return null;
+}
+
 // Update the configuration value when a cell is edited
-function updateConfigurationValue(cell) {
+function updateConfigurationValue(cell, radioValue) {
     const menuName = cell.dataset.menu;
     const settingName = cell.dataset.setting;
     const columnIndex = parseInt(cell.dataset.column);
-    let newValue = cell.textContent.trim();
+    let newValue;
 
-    // Try to parse the value as JSON if it looks like a JSON string
-    try {
-        if (newValue.startsWith('"') && newValue.endsWith('"')) {
-            // It's a string, remove the quotes
-            newValue = newValue.substring(1, newValue.length - 1);
-        } else if (newValue === 'true' || newValue === 'false') {
-            // It's a boolean
-            newValue = newValue === 'true';
-        } else if (!isNaN(Number(newValue))) {
-            // It's a number
-            newValue = Number(newValue);
-        } else if (newValue.startsWith('{') || newValue.startsWith('[')) {
-            // It's a complex object or array
-            newValue = JSON.parse(newValue);
+    if (radioValue !== undefined) {
+        // If a radio value is provided, use it directly
+        newValue = radioValue;
+    } else {
+        // Otherwise, get the value from the cell's text content
+        newValue = cell.textContent.trim();
+
+        // Try to parse the value as JSON if it looks like a JSON string
+        try {
+            if (newValue.startsWith('"') && newValue.endsWith('"')) {
+                // It's a string, remove the quotes
+                newValue = newValue.substring(1, newValue.length - 1);
+            } else if (newValue === 'true' || newValue === 'false') {
+                // It's a boolean
+                newValue = newValue === 'true';
+            } else if (!isNaN(Number(newValue))) {
+                // It's a number
+                newValue = Number(newValue);
+            } else if (newValue.startsWith('{') || newValue.startsWith('[')) {
+                // It's a complex object or array
+                newValue = JSON.parse(newValue);
+            }
+        } catch (error) {
+            console.warn('Failed to parse value, using as string:', error);
+            // If parsing fails, keep it as a string
         }
-    } catch (error) {
-        console.warn('Failed to parse value, using as string:', error);
-        // If parsing fails, keep it as a string
     }
 
     // Update the configuration
@@ -358,8 +510,12 @@ function updateConfigurationValue(cell) {
         autoSaveConfiguration(columnIndex);
     }
 
-    // Re-render the table to update highlighting for differences
-    renderSettingsTable();
+    // If this is a radio button selection (radioValue is defined), don't re-render the table
+    // This prevents losing the radio button selection state
+    if (radioValue === undefined) {
+        // Only re-render the table for text edits, not radio selections
+        renderSettingsTable();
+    }
 }
 
 // Auto-save configuration after a delay
@@ -377,7 +533,7 @@ function autoSaveConfiguration(columnIndex) {
     }, 2000);
 }
 
-// Add some additional CSS for selected column and editable cells
+// Add some additional CSS for selected column, editable cells, and radio buttons
 document.head.insertAdjacentHTML('beforeend', `
 <style>
     .column.selected {
@@ -399,6 +555,32 @@ document.head.insertAdjacentHTML('beforeend', `
         outline: none;
         background-color: #f0f0f0;
         border: 1px solid #0078d7;
+    }
+
+    /* Radio button styles */
+    .radio-container {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        padding: 4px;
+    }
+
+    .radio-label {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        font-size: 14px;
+        margin-bottom: 2px;
+    }
+
+    .radio-label input[type="radio"] {
+        margin-right: 5px;
+    }
+
+    /* Highlight selected radio option */
+    .radio-label input[type="radio"]:checked + span {
+        font-weight: bold;
+        color: #0078d7;
     }
 </style>
 `);
