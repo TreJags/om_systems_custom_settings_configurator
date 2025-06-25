@@ -1,0 +1,53 @@
+{
+  "name": "om-systems-custom-settings-configurator",
+  "version": "1.0.0",
+  "description": "OM System Custom Settings Configurator application",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder",
+    "build-win": "electron-builder --win --x64"
+  },
+  "build": {
+    "appId": "com.yourusername.om-systems-custom-settings-configurator",
+    "productName": "OM-System Custom Settings Configurator",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/om_systems_custom_settings_configurator.git"
+  },
+  "keywords": [
+    "OM-System",
+    "camera",
+    "settings",
+    "configurator",
+    "electron"
+  ],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/yourusername/om_systems_custom_settings_configurator/issues"
+  },
+  "homepage": "https://github.com/yourusername/om_systems_custom_settings_configurator#readme",
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.6.4"
+  },
+  "dependencies": {
+    "electron-store": "^8.1.0"
+  }
+}

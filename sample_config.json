@@ -1,0 +1,93 @@
+{
+  "Menu 1": {
+    "Custom Mode": {
+      "C1": "Landscape",
+      "C2": "Portrait",
+      "C3": "Macro",
+      "C4": "Sports"
+    },
+    "Button Settings": {
+      "AEL/AFL": "AEL/AFL",
+      "Fn": "ISO",
+      "Movie": "Record"
+    }
+  },
+  "Menu 2": {
+    "Focus BKT": {
+      "Set number of shots": 5,
+      "Set focus differential": "Wide",
+      "Set charge time": "0 Sec"
+    },
+    "ART BKT": {
+      "Pop Art": true,
+      "Soft Focus": false,
+      "Pale&Light Color": true,
+      "Light Tone": false,
+      "Grainy Film": true
+    },
+    "ISO BKT": {
+      "Value": "±1.0",
+      "Number of Frames": 3
+    },
+    "Drive": {
+      "Mode": "Sequential High",
+      "FPS": 15
+    },
+    "C-AF Sensitivity": {
+      "Value": "+2"
+    }
+  },
+  "Menu 3": {
+    "Live ND Shooting": {
+      "Live ND Filter": "ND8",
+      "LV Simulation": "On"
+    },
+    "Focus Stacking": {
+      "Set number of shots": 8,
+      "Set focus differential": "Narrow",
+      "Charge Time": "0 Sec"
+    },
+    "Flicker Scan": {
+      "Enabled": false
+    },
+    "Face& Eye Detection": {
+      "Face Priority": true,
+      "Eye Priority": true
+    }
+  },
+  "Menu 4": {
+    "Interval Shooting": {
+      "Frames": 100,
+      "Start Waiting Time": "00:00:30",
+      "Interval Length": "00:00:05"
+    },
+    "Sequential Shooting Settings": {
+      "Sequential Low": 5,
+      "Sequential High": 15
+    },
+    "Subject Detection": {
+      "Vehicles": true,
+      "Airplanes": true,
+      "Trains": false,
+      "Birds": true,
+      "Animals": true
+    }
+  },
+  "Menu 5": {
+    "Starry Sky AF Setting": {
+      "Speed": "Priority on AF",
+      "Accuracy": "High"
+    },
+    "Noise Reduction": {
+      "Auto": true,
+      "Value": "Standard"
+    },
+    "Card Formatting": {
+      "Format Card on Startup": false
+    },
+    "AF Focus Adjustment": {
+      "S-AF": "+2",
+      "C-AF": "0"
+    }
+  }
+}

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OM-System Custom Settings Configurator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 8px 16px;
+            background-color: #0078d7;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056a3;
+        }
+
+        .columns-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .column {
+            flex: 1;
+            background-color: white;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 10px;
+        }
+
+        .column-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .column-title {
+            font-weight: bold;
+        }
+
+        .column-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .settings-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .settings-table th, .settings-table td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .settings-table th {
+            background-color: #f0f0f0;
+        }
+
+        .menu-row {
+            font-weight: bold;
+            cursor: pointer;
+            background-color: #f0f0f0;
+        }
+
+        .menu-row:hover {
+            background-color: #e0e0e0;
+        }
+
+        .setting-row {
+            display: none;
+        }
+
+        .setting-row.expanded {
+            display: table-row;
+        }
+
+        .different {
+            background-color: #fff0f0;
+        }
+
+        .expand-icon {
+            display: inline-block;
+            width: 16px;
+            text-align: center;
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="title">OM-System Custom Settings Configurator</div>
+            <div class="actions">
+                <button id="new-config">New Configuration</button>
+                <button id="load-config">Load Configuration</button>
+                <button id="save-config">Save Configuration</button>
+            </div>
+        </div>
+
+        <div class="columns-container">
+            <div class="column" id="column-1">
+                <div class="column-header">
+                    <div class="column-title">Custom 1</div>
+                    <div class="column-actions">
+                        <button class="load-column">Load</button>
+                        <button class="save-column">Save</button>
+                    </div>
+                </div>
+                <div class="column-content"></div>
+            </div>
+
+            <div class="column" id="column-2">
+                <div class="column-header">
+                    <div class="column-title">Custom 2</div>
+                    <div class="column-actions">
+                        <button class="load-column">Load</button>
+                        <button class="save-column">Save</button>
+                    </div>
+                </div>
+                <div class="column-content"></div>
+            </div>
+
+            <div class="column" id="column-3">
+                <div class="column-header">
+                    <div class="column-title">Custom 3</div>
+                    <div class="column-actions">
+                        <button class="load-column">Load</button>
+                        <button class="save-column">Save</button>
+                    </div>
+                </div>
+                <div class="column-content"></div>
+            </div>
+
+            <div class="column" id="column-4">
+                <div class="column-header">
+                    <div class="column-title">Custom 4</div>
+                    <div class="column-actions">
+                        <button class="load-column">Load</button>
+                        <button class="save-column">Save</button>
+                    </div>
+                </div>
+                <div class="column-content"></div>
+            </div>
+        </div>
+
+        <div class="menu-actions" style="margin-bottom: 10px; text-align: left;">
+            <button id="expand-all">Expand All</button>
+            <button id="collapse-all">Collapse All</button>
+        </div>
+
+        <table class="settings-table" id="settings-table">
+            <thead>
+                <tr>
+                    <th>Setting</th>
+                    <th>Custom 1</th>
+                    <th>Custom 2</th>
+                    <th>Custom 3</th>
+                    <th>Custom 4</th>
+                </tr>
+            </thead>
+            <tbody id="settings-body">
+                <!-- Settings rows will be dynamically generated here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script src="renderer.js"></script>
+</body>
+</html>
