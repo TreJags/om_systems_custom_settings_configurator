@@ -51,6 +51,31 @@
             display: flex;
             gap: 10px;
             margin-bottom: 20px;
+            overflow: hidden;
+            transition: max-height 0.3s ease-in-out;
+            max-height: 500px; /* Adjust this value based on the actual height of your content */
+        }
+
+        .columns-container.collapsed {
+            max-height: 0;
+            margin-bottom: 0;
+        }
+
+        .config-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+
+        .toggle-config-section {
+            display: inline-block;
+            width: 16px;
+            text-align: center;
+            margin-right: 5px;
+            font-weight: bold;
+            cursor: pointer;
         }
 
         .column {
@@ -122,6 +147,17 @@
             text-align: center;
             margin-right: 5px;
         }
+
+        .column-icon {
+            display: inline-block;
+            cursor: pointer;
+            margin-left: 5px;
+            font-size: 16px;
+        }
+
+        .column-icon:hover {
+            opacity: 0.7;
+        }
     </style>
 </head>
 <body>
@@ -133,6 +169,10 @@
                 <button id="load-config">Load Configuration</button>
                 <button id="save-config">Save Configuration</button>
             </div>
+        </div>
+
+        <div class="config-section-header" id="config-section-toggle">
+            <div><span class="toggle-config-section">-</span>Configuration Selection Boxes</div>
         </div>
 
         <div class="columns-container">
@@ -189,11 +229,11 @@
         <table class="settings-table" id="settings-table">
             <thead>
                 <tr>
-                    <th>Setting</th>
-                    <th>Custom 1</th>
-                    <th>Custom 2</th>
-                    <th>Custom 3</th>
-                    <th>Custom 4</th>
+                    <th>Setting <span class="column-icon load-all-icon">📂</span> <span class="column-icon save-all-icon">💾</span></th>
+                    <th><span class="column-icon load-icon" data-column="0">📂</span> Custom 1 <span class="column-icon save-icon" data-column="0">💾</span></th>
+                    <th><span class="column-icon load-icon" data-column="1">📂</span> Custom 2 <span class="column-icon save-icon" data-column="1">💾</span></th>
+                    <th><span class="column-icon load-icon" data-column="2">📂</span> Custom 3 <span class="column-icon save-icon" data-column="2">💾</span></th>
+                    <th><span class="column-icon load-icon" data-column="3">📂</span> Custom 4 <span class="column-icon save-icon" data-column="3">💾</span></th>
                 </tr>
             </thead>
             <tbody id="settings-body">

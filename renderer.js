@@ -14,6 +14,12 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('expand-all').addEventListener('click', expandAllMenus);
     document.getElementById('collapse-all').addEventListener('click', collapseAllMenus);
 
+    // Configuration section toggle
+    document.getElementById('config-section-toggle').addEventListener('click', toggleConfigSection);
+
+    // Initialize configuration section state from localStorage
+    initConfigSectionState();
+
     // Column-specific load/save buttons
     const loadButtons = document.querySelectorAll('.load-column');
     const saveButtons = document.querySelectorAll('.save-column');
@@ -21,6 +27,44 @@ document.addEventListener('DOMContentLoaded', () => {
     for (let i = 0; i < loadButtons.length; i++) {
         loadButtons[i].addEventListener('click', () => loadConfigToColumn(i));
         saveButtons[i].addEventListener('click', () => saveColumnConfig(i));
+    }
+
+    // Column header icons for load/save
+    const loadIcons = document.querySelectorAll('.load-icon');
+    const saveIcons = document.querySelectorAll('.save-icon');
+
+    for (let i = 0; i < loadIcons.length; i++) {
+        loadIcons[i].addEventListener('click', (event) => {
+            event.stopPropagation(); // Prevent event bubbling
+            const columnIndex = parseInt(event.target.dataset.column);
+            loadConfigToColumn(columnIndex);
+        });
+    }
+
+    for (let i = 0; i < saveIcons.length; i++) {
+        saveIcons[i].addEventListener('click', (event) => {
+            event.stopPropagation(); // Prevent event bubbling
+            const columnIndex = parseInt(event.target.dataset.column);
+            saveColumnConfig(columnIndex);
+        });
+    }
+
+    // Load All and Save All icons
+    const loadAllIcon = document.querySelector('.load-all-icon');
+    const saveAllIcon = document.querySelector('.save-all-icon');
+
+    if (loadAllIcon) {
+        loadAllIcon.addEventListener('click', (event) => {
+            event.stopPropagation(); // Prevent event bubbling
+            loadAllConfigs();
+        });
+    }
+
+    if (saveAllIcon) {
+        saveAllIcon.addEventListener('click', (event) => {
+            event.stopPropagation(); // Prevent event bubbling
+            saveAllConfigs();
+        });
     }
 
     // Initialize with default configurations
@@ -162,6 +206,16 @@ function renderSettingsTable() {
 
         // Function to process a setting and create a row for it
         const processSettingName = (settingName) => {
+            // Check if this setting has selectable options (array of strings/numbers)
+            const settingOptions = getSettingOptions(menuName, settingName);
+            const hasOptions = settingOptions && settingOptions.length > 0;
+
+            // Skip creating rows for settings that don't have radio buttons
+            // This will clean up the rendered settings area
+            if (!hasOptions && settingName.includes(' - ')) {
+                return;
+            }
+
             const settingRow = document.createElement('tr');
             settingRow.className = 'setting-row';
             settingRow.dataset.menu = menuName;
@@ -192,10 +246,6 @@ function renderSettingsTable() {
                     break;
                 }
             }
-
-            // Check if this setting has selectable options (array of strings/numbers)
-            const settingOptions = getSettingOptions(menuName, settingName);
-            const hasOptions = settingOptions && settingOptions.length > 0;
 
             // Add value cells
             for (let i = 0; i < 4; i++) {
@@ -289,16 +339,20 @@ function renderSettingsTable() {
                 // If the setting is itself an object or array, process its children recursively
                 if (typeof settingNames[settingName] === 'object' && settingNames[settingName] !== null) {
                     if (Array.isArray(settingNames[settingName])) {
-                        // Handle array of sub-settings
-                        for (const subSetting of settingNames[settingName]) {
-                            if (typeof subSetting === 'string' || typeof subSetting === 'number') {
-                                processSettingName(`${settingName} - ${subSetting}`);
-                            }
-                        }
+                        // Skip creating rows for array items that don't have radio buttons
+                        // These are typically just informational items, not selectable options
+                        // For example: "Photo Quality Detailed Settings - Settings One L-SF"
                     } else {
                         // Handle object of sub-settings
                         for (const subSettingName in settingNames[settingName]) {
-                            processSettingName(`${settingName} - ${subSettingName}`);
+                            // Check if this sub-setting has selectable options
+                            const subSettingOptions = getSettingOptions(menuName, `${settingName} - ${subSettingName}`);
+                            const hasSubOptions = subSettingOptions && subSettingOptions.length > 0;
+
+                            // Only create a row if it has selectable options
+                            if (hasSubOptions) {
+                                processSettingName(`${settingName} - ${subSettingName}`);
+                            }
 
                             // Handle deeper nesting (e.g., Custom Mode -> C1 -> Recall)
                             if (typeof settingNames[settingName][subSettingName] === 'object' && 
@@ -309,7 +363,14 @@ function renderSettingsTable() {
                                 } else {
                                     // Process third-level nested objects
                                     for (const subSubSettingName in settingNames[settingName][subSettingName]) {
-                                        processSettingName(`${settingName} - ${subSettingName} - ${subSubSettingName}`);
+                                        // Check if this sub-sub-setting has selectable options
+                                        const subSubSettingOptions = getSettingOptions(menuName, `${settingName} - ${subSettingName} - ${subSubSettingName}`);
+                                        const hasSubSubOptions = subSubSettingOptions && subSubSettingOptions.length > 0;
+
+                                        // Only create a row if it has selectable options
+                                        if (hasSubSubOptions) {
+                                            processSettingName(`${settingName} - ${subSettingName} - ${subSubSettingName}`);
+                                        }
                                     }
                                 }
                             }
@@ -389,6 +450,47 @@ function collapseAllMenus() {
             row.classList.remove('expanded');
         });
     });
+}
+
+// Toggle configuration section expansion
+function toggleConfigSection() {
+    const columnsContainer = document.querySelector('.columns-container');
+    const toggleIcon = this.querySelector('.toggle-config-section');
+
+    // Check if the section is currently expanded
+    const isExpanded = !columnsContainer.classList.contains('collapsed');
+
+    if (isExpanded) {
+        // Collapse the section
+        columnsContainer.classList.add('collapsed');
+        toggleIcon.textContent = '+';
+    } else {
+        // Expand the section
+        columnsContainer.classList.remove('collapsed');
+        toggleIcon.textContent = '-';
+    }
+
+    // Save the state to localStorage for persistence
+    localStorage.setItem('configSectionExpanded', !isExpanded);
+}
+
+// Initialize configuration section state from localStorage
+function initConfigSectionState() {
+    const columnsContainer = document.querySelector('.columns-container');
+    const toggleIcon = document.querySelector('.toggle-config-section');
+
+    // Get saved state from localStorage (default to expanded if not set)
+    const isExpanded = localStorage.getItem('configSectionExpanded') !== 'false';
+
+    if (!isExpanded) {
+        // Collapse the section
+        columnsContainer.classList.add('collapsed');
+        toggleIcon.textContent = '+';
+    } else {
+        // Expand the section (default)
+        columnsContainer.classList.remove('collapsed');
+        toggleIcon.textContent = '-';
+    }
 }
 
 // Event handlers for editable cells
@@ -531,6 +633,54 @@ function autoSaveConfiguration(columnIndex) {
         saveColumnConfig(columnIndex);
         autoSaveTimers[columnIndex] = null;
     }, 2000);
+}
+
+// Load all configurations from a single file
+function loadAllConfigs() {
+    window.api.loadConfig().then(result => {
+        if (result.success) {
+            try {
+                const allSettings = result.data;
+
+                // Check if the loaded file contains all configurations
+                if (Array.isArray(allSettings) && allSettings.length === 4) {
+                    // Update all configurations
+                    for (let i = 0; i < 4; i++) {
+                        configurations[i] = allSettings[i];
+                    }
+
+                    // Update file paths (all pointing to the same file)
+                    configFilePaths = Array(4).fill(result.filePath);
+
+                    // Render the updated settings
+                    renderSettingsTable();
+
+                    alert('All configurations loaded successfully!');
+                } else {
+                    alert('Invalid all_settings.json format. Expected an array of 4 configurations.');
+                }
+            } catch (error) {
+                alert('Failed to parse all_settings.json: ' + error.message);
+            }
+        } else if (result.message !== 'Load cancelled') {
+            alert('Failed to load configurations: ' + result.message);
+        }
+    });
+}
+
+// Save all configurations to a single file
+function saveAllConfigs() {
+    // Create a copy of all configurations
+    const allSettings = JSON.parse(JSON.stringify(configurations));
+
+    // Save to all_settings.json
+    window.api.saveConfig(allSettings, 'all_settings.json').then(result => {
+        if (result.success) {
+            alert('All configurations saved successfully!');
+        } else if (result.message !== 'Save cancelled') {
+            alert('Failed to save configurations: ' + result.message);
+        }
+    });
 }
 
 // Add some additional CSS for selected column, editable cells, and radio buttons

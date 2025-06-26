@@ -1,0 +1,50 @@
+{
+  "Basic Settings / Image Quality": {
+    "Custom Mode": {},
+    "Photo Quality": {},
+    "Photo Quality Detailed Settings": {},
+    "Image Aspect": {},
+    "Image Review": {},
+    "Shading Compensation": {},
+    "Custom Mode - C1 - Assign": "Reset"
+  },
+  "Picture Mode / White Balance": {
+    "Picture Mode": {},
+    "Picture Mode Settings": {},
+    "White Balance": {},
+    "White Balance All": {},
+    "WB Keep Warm Color": {},
+    "Flash WB": {},
+    "Color Space": {}
+  },
+  "ISO / Noise Reduction": {
+    "ISO-A Upper/Default": {},
+    "ISO-A Lowest S/S": {},
+    "ISO-Auto": {},
+    "ISO Step": {},
+    "Noise Filter": {},
+    "Low ISO Processing": {},
+    "Noise Reduction": {}
+  },
+  "Exposure": {
+    "Flicker Scan": {},
+    "EV Step": {},
+    "Exposure Shift": {}
+  },
+  "Metering": {
+    "Metering": {},
+    "Metering During AEL": {},
+    "AEL Auto Reset": {},
+    "AEL by Half-Pressing": {},
+    "Metering During High-Speed Shooting": {},
+    "Spot Metering": {}
+  },
+  "Flash": {
+    "Flash RC Mode": {},
+    "X-Sync": {},
+    "Slow Limit": {},
+    "Flash Exposure + Exposure": {},
+    "Balanced Flash Metering": {},
+    "Flash Mode Settings": {}
+  }
+}
