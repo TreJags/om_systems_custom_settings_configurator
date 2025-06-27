@@ -67,6 +67,26 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Copy To functionality
+    const sendToIcons = document.querySelectorAll('.send-to-icon');
+
+    for (let i = 0; i < sendToIcons.length; i++) {
+        sendToIcons[i].addEventListener('click', (event) => {
+            event.stopPropagation(); // Prevent event bubbling
+            const sourceColumnIndex = parseInt(event.target.dataset.column);
+            const selectElement = document.querySelector(`.copy-to-select[data-column="${sourceColumnIndex}"]`);
+            const targetValue = selectElement.value;
+
+            if (targetValue) {
+                copyColumnSettings(sourceColumnIndex, targetValue);
+                // Reset the dropdown to the default option
+                selectElement.selectedIndex = 0;
+            } else {
+                alert('Please select a destination column first.');
+            }
+        });
+    }
+
     // Initialize with default configurations
     initializeConfigurations();
 });
@@ -679,6 +699,66 @@ function saveAllConfigs() {
             alert('All configurations saved successfully!');
         } else if (result.message !== 'Save cancelled') {
             alert('Failed to save configurations: ' + result.message);
+        }
+    });
+}
+
+// Copy settings from one column to another or to all columns
+function copyColumnSettings(sourceColumnIndex, targetValue) {
+    // Get the source configuration
+    const sourceConfig = configurations[sourceColumnIndex];
+
+    if (!sourceConfig) {
+        alert('Source configuration is not available.');
+        return;
+    }
+
+    // Store the expansion state of menus before re-rendering
+    const expandedMenus = [];
+    document.querySelectorAll('.menu-row').forEach(menuRow => {
+        const expandIcon = menuRow.querySelector('.expand-icon');
+        if (expandIcon && expandIcon.textContent === '-') {
+            expandedMenus.push(menuRow.dataset.menu);
+        }
+    });
+
+    // Create a deep copy of the source configuration
+    const sourceConfigCopy = JSON.parse(JSON.stringify(sourceConfig));
+
+    if (targetValue === 'all') {
+        // Copy to all columns except the source
+        for (let i = 0; i < configurations.length; i++) {
+            if (i !== sourceColumnIndex) {
+                configurations[i] = JSON.parse(JSON.stringify(sourceConfigCopy));
+            }
+        }
+        alert(`Settings from Custom ${sourceColumnIndex + 1} copied to all other columns.`);
+    } else {
+        // Copy to the specific target column
+        const targetColumnIndex = parseInt(targetValue);
+        configurations[targetColumnIndex] = JSON.parse(JSON.stringify(sourceConfigCopy));
+        alert(`Settings from Custom ${sourceColumnIndex + 1} copied to Custom ${targetColumnIndex + 1}.`);
+    }
+
+    // Re-render the settings table to reflect the changes
+    renderSettingsTable();
+
+    // Restore the expansion state of menus after re-rendering
+    expandedMenus.forEach(menuName => {
+        const menuRow = document.querySelector(`.menu-row[data-menu="${menuName}"]`);
+        if (menuRow) {
+            const expandIcon = menuRow.querySelector('.expand-icon');
+            const settingRows = document.querySelectorAll(`.setting-row[data-menu="${menuName}"]`);
+
+            // Set icon to expanded state
+            if (expandIcon) {
+                expandIcon.textContent = '-';
+            }
+
+            // Show all setting rows for this menu
+            settingRows.forEach(row => {
+                row.classList.add('expanded');
+            });
         }
     });
 }
