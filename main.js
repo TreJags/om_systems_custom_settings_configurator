@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, Menu } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const Store = require('electron-store');
@@ -33,9 +33,65 @@ function createWindow() {
   });
 }
 
+// Create application menu
+function createMenu() {
+  // Get the current state of the copy icons settings (default to true if not set)
+  const showCopyIcons = store.get('showCopyIcons', true);
+  const showMenuCopyIcons = store.get('showMenuCopyIcons', true);
+  const showConfigSection = store.get('showConfigSection', true);
+
+  const template = [
+    {
+      label: 'File',
+      submenu: [
+        { role: 'quit' }
+      ]
+    },
+    {
+      label: 'View',
+      submenu: [
+        { role: 'reload' },
+        { role: 'toggledevtools' },
+        { type: 'separator' },
+        { role: 'resetzoom' },
+        { role: 'zoomin' },
+        { role: 'zoomout' },
+        { type: 'separator' },
+        { role: 'togglefullscreen' }
+      ]
+    },
+    {
+      label: 'Settings',
+      submenu: [
+        {
+          label: 'Open Settings',
+          click: () => {
+            mainWindow.webContents.send('show-settings');
+          }
+        }
+      ]
+    },
+    {
+      label: 'Help',
+      submenu: [
+        {
+          label: 'About',
+          click: () => {
+            mainWindow.webContents.send('show-about');
+          }
+        }
+      ]
+    }
+  ];
+
+  const menu = Menu.buildFromTemplate(template);
+  Menu.setApplicationMenu(menu);
+}
+
 // This method will be called when Electron has finished initialization
 app.whenReady().then(() => {
   createWindow();
+  createMenu();
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window when the dock icon is clicked
@@ -130,6 +186,64 @@ ipcMain.handle('get-menu-structure', () => {
     return { success: true, data: menuStructure };
   } catch (error) {
     console.error('Error loading menu structure:', error);
+    return { success: false, message: error.message };
+  }
+});
+
+// Get about content
+ipcMain.handle('get-about-content', () => {
+  try {
+    const aboutContentPath = path.join(__dirname, 'OM_System_Functional_Breakdown.md');
+    const aboutContent = fs.readFileSync(aboutContentPath, 'utf8');
+    return { success: true, data: aboutContent };
+  } catch (error) {
+    console.error('Error loading about content:', error);
+    return { success: false, message: error.message };
+  }
+});
+
+// Get show copy icons setting
+ipcMain.handle('get-show-copy-icons', () => {
+  // Default to true if not set
+  return store.get('showCopyIcons', true);
+});
+
+// Get show menu copy icons setting
+ipcMain.handle('get-show-menu-copy-icons', () => {
+  // Default to true if not set
+  return store.get('showMenuCopyIcons', true);
+});
+
+// Get show config section setting
+ipcMain.handle('get-show-config-section', () => {
+  // Default to true if not set
+  return store.get('showConfigSection', true);
+});
+
+// Save settings
+ipcMain.handle('save-settings', (event, settings) => {
+  try {
+    // Save each setting to the store
+    for (const key in settings) {
+      store.set(key, settings[key]);
+    }
+
+    // Notify the renderer process of the changes
+    if (settings.hasOwnProperty('showCopyIcons')) {
+      mainWindow.webContents.send('toggle-copy-icons', settings.showCopyIcons);
+    }
+
+    if (settings.hasOwnProperty('showMenuCopyIcons')) {
+      mainWindow.webContents.send('toggle-menu-copy-icons', settings.showMenuCopyIcons);
+    }
+
+    if (settings.hasOwnProperty('showConfigSection')) {
+      mainWindow.webContents.send('toggle-config-section', settings.showConfigSection);
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error saving settings:', error);
     return { success: false, message: error.message };
   }
 });

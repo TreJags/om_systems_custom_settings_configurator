@@ -153,6 +153,7 @@
             cursor: pointer;
             margin-left: 5px;
             font-size: 16px;
+            position: relative;
         }
 
         .column-icon:hover {
@@ -181,9 +182,193 @@
         .send-to-icon:hover {
             opacity: 0.7;
         }
+    /* About modal styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.4);
+    }
+
+    .modal-content {
+        background-color: #fefefe;
+        margin: 5% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        border-radius: 5px;
+        width: 80%;
+        max-width: 800px;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .close:hover,
+    .close:focus {
+        color: black;
+        text-decoration: none;
+    }
+
+    .about-content {
+        margin-top: 20px;
+        line-height: 1.6;
+    }
+
+    .about-content h1 {
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+
+    .about-content h2 {
+        font-size: 20px;
+        margin-top: 20px;
+        margin-bottom: 10px;
+    }
+
+    .about-content h3 {
+        font-size: 18px;
+        margin-top: 15px;
+        margin-bottom: 5px;
+    }
+
+    .about-content ul {
+        margin-left: 20px;
+        margin-bottom: 15px;
+    }
+
+    .about-content li {
+        margin-bottom: 5px;
+    }
+
+    /* Settings modal styles */
+    .settings-content {
+        margin-top: 20px;
+    }
+
+    .setting-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        padding: 10px;
+        background-color: #f9f9f9;
+        border-radius: 5px;
+    }
+
+    /* The switch - the box around the slider */
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+    }
+
+    /* Hide default HTML checkbox */
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    /* The slider */
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: .4s;
+    }
+
+    input:checked + .slider {
+        background-color: #0078d7;
+    }
+
+    input:focus + .slider {
+        box-shadow: 0 0 1px #0078d7;
+    }
+
+    input:checked + .slider:before {
+        transform: translateX(26px);
+    }
+
+    /* Rounded sliders */
+    .slider.round {
+        border-radius: 34px;
+    }
+
+    .slider.round:before {
+        border-radius: 50%;
+    }
     </style>
 </head>
 <body>
+    <!-- About Modal -->
+    <div id="about-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="about-content" class="about-content">
+                <!-- Content will be loaded dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Settings</h2>
+            <div class="settings-content">
+                <div class="setting-item">
+                    <label for="show-row-copy-icons">Copy Icons - Individual Rows</label>
+                    <label class="switch">
+                        <input type="checkbox" id="show-row-copy-icons" checked>
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <label for="show-menu-copy-icons">Copy Icons - Settings Expand</label>
+                    <label class="switch">
+                        <input type="checkbox" id="show-menu-copy-icons" checked>
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <label for="show-config-section">Show Configuration Selection Boxes</label>
+                    <label class="switch">
+                        <input type="checkbox" id="show-config-section" checked>
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
         <div class="header">
             <div class="title">OM-System Custom Settings Configurator</div>
@@ -252,9 +437,9 @@
         <table class="settings-table" id="settings-table">
             <thead>
                 <tr>
-                    <th>Setting <span class="column-icon load-all-icon">📂</span> <span class="column-icon save-all-icon">💾</span></th>
+                    <th>Setting <span class="column-icon load-all-icon" title="Load all configurations from a single file">📂</span> <span class="column-icon save-all-icon" title="Save all configurations to a single file">💾</span></th>
                     <th>
-                        <span class="column-icon load-icon" data-column="0">📂</span> Custom 1 <span class="column-icon save-icon" data-column="0">💾</span>
+                        <span class="column-icon load-icon" data-column="0" title="Load configuration for Custom 1">📂</span> Custom 1 <span class="column-icon save-icon" data-column="0" title="Save configuration for Custom 1">💾</span>
                         <div class="copy-to-container">
                             <select class="copy-to-select" data-column="0">
                                 <option value="" disabled selected>Copy To</option>
@@ -264,11 +449,11 @@
                                 <option value="2">Custom 3</option>
                                 <option value="3">Custom 4</option>
                             </select>
-                            <span class="send-to-icon" data-column="0">➡️</span>
+                            <span class="send-to-icon" data-column="0" title="Copy settings from this column to the selected destination">➡️</span>
                         </div>
                     </th>
                     <th>
-                        <span class="column-icon load-icon" data-column="1">📂</span> Custom 2 <span class="column-icon save-icon" data-column="1">💾</span>
+                        <span class="column-icon load-icon" data-column="1" title="Load configuration for Custom 2">📂</span> Custom 2 <span class="column-icon save-icon" data-column="1" title="Save configuration for Custom 2">💾</span>
                         <div class="copy-to-container">
                             <select class="copy-to-select" data-column="1">
                                 <option value="" disabled selected>Copy To</option>
@@ -278,11 +463,11 @@
                                 <option value="2">Custom 3</option>
                                 <option value="3">Custom 4</option>
                             </select>
-                            <span class="send-to-icon" data-column="1">➡️</span>
+                            <span class="send-to-icon" data-column="1" title="Copy settings from this column to the selected destination">➡️</span>
                         </div>
                     </th>
                     <th>
-                        <span class="column-icon load-icon" data-column="2">📂</span> Custom 3 <span class="column-icon save-icon" data-column="2">💾</span>
+                        <span class="column-icon load-icon" data-column="2" title="Load configuration for Custom 3">📂</span> Custom 3 <span class="column-icon save-icon" data-column="2" title="Save configuration for Custom 3">💾</span>
                         <div class="copy-to-container">
                             <select class="copy-to-select" data-column="2">
                                 <option value="" disabled selected>Copy To</option>
@@ -292,11 +477,11 @@
                                 <option value="2" disabled>Custom 3</option>
                                 <option value="3">Custom 4</option>
                             </select>
-                            <span class="send-to-icon" data-column="2">➡️</span>
+                            <span class="send-to-icon" data-column="2" title="Copy settings from this column to the selected destination">➡️</span>
                         </div>
                     </th>
                     <th>
-                        <span class="column-icon load-icon" data-column="3">📂</span> Custom 4 <span class="column-icon save-icon" data-column="3">💾</span>
+                        <span class="column-icon load-icon" data-column="3" title="Load configuration for Custom 4">📂</span> Custom 4 <span class="column-icon save-icon" data-column="3" title="Save configuration for Custom 4">💾</span>
                         <div class="copy-to-container">
                             <select class="copy-to-select" data-column="3">
                                 <option value="" disabled selected>Copy To</option>
@@ -306,7 +491,7 @@
                                 <option value="2">Custom 3</option>
                                 <option value="3" disabled>Custom 4</option>
                             </select>
-                            <span class="send-to-icon" data-column="3">➡️</span>
+                            <span class="send-to-icon" data-column="3" title="Copy settings from this column to the selected destination">➡️</span>
                         </div>
                     </th>
                 </tr>

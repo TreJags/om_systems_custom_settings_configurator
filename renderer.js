@@ -2,6 +2,10 @@
 let configurations = [null, null, null, null];
 let configFilePaths = ['', '', '', ''];
 let menuStructure = null; // Store the menu structure from the configuration file
+let aboutContent = null; // Store the about content
+let showCopyIcons = true; // Default to showing row copy icons
+let showMenuCopyIcons = true; // Default to showing menu copy icons
+let showConfigSection = true; // Default to showing configuration selection boxes
 
 // DOM elements
 document.addEventListener('DOMContentLoaded', () => {
@@ -19,6 +23,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize configuration section state from localStorage
     initConfigSectionState();
+
+    // About modal functionality
+    const aboutModal = document.getElementById('about-modal');
+    const closeButton = aboutModal.querySelector('.close');
+
+    // Close the modal when the close button is clicked
+    closeButton.addEventListener('click', () => {
+        aboutModal.style.display = 'none';
+    });
+
+    // Close the modal when clicking outside of it
+    window.addEventListener('click', (event) => {
+        if (event.target === aboutModal) {
+            aboutModal.style.display = 'none';
+        }
+    });
+
+    // Listen for show-about event from main process
+    window.api.onShowAbout(() => {
+        showAboutModal();
+    });
+
+    // Add a button to show the Settings modal
+    const settingsButton = document.createElement('button');
+    settingsButton.textContent = 'Settings';
+    settingsButton.addEventListener('click', showSettingsModal);
+    document.querySelector('.actions').appendChild(settingsButton);
+
+    // Add a button to show the About modal
+    const aboutButton = document.createElement('button');
+    aboutButton.textContent = 'About';
+    aboutButton.addEventListener('click', showAboutModal);
+    document.querySelector('.actions').appendChild(aboutButton);
 
     // Column-specific load/save buttons
     const loadButtons = document.querySelectorAll('.load-column');
@@ -85,11 +122,165 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('Please select a destination column first.');
             }
         });
+
+        // Add tooltip to send-to-icon
+        setupTooltip(sendToIcons[i], 'Copy settings from this column to the selected destination');
     }
 
     // Initialize with default configurations
     initializeConfigurations();
+
+    // Initialize tooltips for all copy icons after the table is rendered
+    document.addEventListener('tableRendered', initializeTooltips);
+
+    // Initialize copy icons visibility
+    window.api.getShowCopyIcons().then(value => {
+        showCopyIcons = value;
+        updateCopyIconsVisibility();
+    });
+
+    // Initialize menu copy icons visibility
+    window.api.getShowMenuCopyIcons().then(value => {
+        showMenuCopyIcons = value;
+        updateCopyIconsVisibility();
+    });
+
+    // Initialize config section visibility
+    window.api.getShowConfigSection().then(value => {
+        showConfigSection = value;
+        updateCopyIconsVisibility();
+    });
+
+    // Listen for changes to the copy icons visibility setting
+    window.api.onToggleCopyIcons(value => {
+        showCopyIcons = value;
+        updateCopyIconsVisibility();
+    });
+
+    // Listen for changes to the menu copy icons visibility setting
+    window.api.onToggleMenuCopyIcons(value => {
+        showMenuCopyIcons = value;
+        updateCopyIconsVisibility();
+    });
+
+    // Listen for changes to the config section visibility setting
+    window.api.onToggleConfigSection(value => {
+        showConfigSection = value;
+        updateCopyIconsVisibility();
+    });
+
+    // Listen for show-settings event from main process
+    window.api.onShowSettings(() => {
+        showSettingsModal();
+    });
 });
+
+// Function to update the visibility of copy icons and configuration section based on the settings
+function updateCopyIconsVisibility() {
+    // Update the visibility of setting copy icons (row icons)
+    document.querySelectorAll('.copy-setting-icon').forEach(icon => {
+        icon.style.display = showCopyIcons ? 'inline-block' : 'none';
+    });
+
+    // Update the visibility of menu copy icons (expandable title row icons)
+    document.querySelectorAll('.copy-menu-icon').forEach(icon => {
+        icon.style.display = showMenuCopyIcons ? 'inline-block' : 'none';
+    });
+
+    // Update the visibility of the configuration selection boxes section
+    const columnsContainer = document.querySelector('.columns-container');
+    const toggleIcon = document.querySelector('.toggle-config-section');
+    const configSectionHeader = document.getElementById('config-section-toggle');
+
+    if (showConfigSection) {
+        // Show the section
+        columnsContainer.classList.remove('collapsed');
+        toggleIcon.textContent = '-';
+        configSectionHeader.style.display = 'flex'; // Show the header
+    } else {
+        // Hide the section
+        columnsContainer.classList.add('collapsed');
+        toggleIcon.textContent = '+';
+        configSectionHeader.style.display = 'none'; // Hide the header
+    }
+}
+
+// Function to initialize tooltips for all copy icons
+function initializeTooltips() {
+    // Setup tooltips for menu copy icons
+    document.querySelectorAll('.copy-menu-icon').forEach(icon => {
+        setupTooltip(icon, icon.title || 'Copy all settings in this section from column 1 to columns 2-4');
+    });
+
+    // Setup tooltips for setting copy icons
+    document.querySelectorAll('.copy-setting-icon').forEach(icon => {
+        setupTooltip(icon, icon.title || 'Copy this setting from column 1 to columns 2-4');
+    });
+
+    // Setup tooltips for send-to icons
+    document.querySelectorAll('.send-to-icon').forEach(icon => {
+        setupTooltip(icon, icon.title || 'Copy settings from this column to the selected destination');
+    });
+
+    // Setup tooltips for load icons
+    document.querySelectorAll('.load-icon').forEach(icon => {
+        const columnIndex = parseInt(icon.dataset.column);
+        setupTooltip(icon, icon.title || `Load configuration for Custom ${columnIndex + 1}`);
+    });
+
+    // Setup tooltips for save icons
+    document.querySelectorAll('.save-icon').forEach(icon => {
+        const columnIndex = parseInt(icon.dataset.column);
+        setupTooltip(icon, icon.title || `Save configuration for Custom ${columnIndex + 1}`);
+    });
+
+    // Setup tooltips for load-all and save-all icons
+    const loadAllIcon = document.querySelector('.load-all-icon');
+    if (loadAllIcon) {
+        setupTooltip(loadAllIcon, loadAllIcon.title || 'Load all configurations from a single file');
+    }
+
+    const saveAllIcon = document.querySelector('.save-all-icon');
+    if (saveAllIcon) {
+        setupTooltip(saveAllIcon, saveAllIcon.title || 'Save all configurations to a single file');
+    }
+}
+
+// Function to setup a tooltip for an element
+function setupTooltip(element, text) {
+    // Remove any existing tooltip
+    const existingTooltip = element.querySelector('.custom-tooltip');
+    if (existingTooltip) {
+        existingTooltip.remove();
+    }
+
+    // Create tooltip element
+    const tooltip = document.createElement('div');
+    tooltip.className = 'custom-tooltip';
+    tooltip.textContent = text;
+    element.appendChild(tooltip);
+
+    let tooltipTimer;
+
+    // Show tooltip after 2 seconds of hovering
+    element.addEventListener('mouseenter', () => {
+        tooltipTimer = setTimeout(() => {
+            tooltip.classList.add('show');
+        }, 2000); // 2 seconds delay
+    });
+
+    // Hide tooltip when mouse leaves
+    element.addEventListener('mouseleave', () => {
+        clearTimeout(tooltipTimer);
+        tooltip.classList.remove('show');
+    });
+
+    // Hide tooltip when clicked
+    element.addEventListener('click', () => {
+        clearTimeout(tooltipTimer);
+        tooltip.classList.remove('show');
+    });
+}
 
 // Initialize all configurations with default structure
 async function initializeConfigurations() {
@@ -210,7 +401,34 @@ function renderSettingsTable() {
         menuRow.dataset.menu = menuName;
 
         const menuCell = document.createElement('td');
-        menuCell.innerHTML = `<span class="expand-icon">+</span>${menuName}`;
+
+        // Create a container for the menu name and copy icon
+        const menuContainer = document.createElement('div');
+        menuContainer.className = 'menu-container';
+
+        // Add the expand icon and menu name
+        const menuContent = document.createElement('div');
+        menuContent.innerHTML = `<span class="expand-icon">+</span>${menuName}`;
+        menuContainer.appendChild(menuContent);
+
+        // Add a different colored arrow icon for copying all settings in this menu from column 1 to columns 2-4
+        const menuCopyIcon = document.createElement('span');
+        menuCopyIcon.className = 'copy-menu-icon';
+        menuCopyIcon.innerHTML = '🔄';
+        menuCopyIcon.title = 'Copy all settings in this section from column 1 to columns 2-4';
+        menuCopyIcon.dataset.menu = menuName;
+
+        // Add event listener to copy all settings in this menu from column 1 to columns 2-4
+        menuCopyIcon.addEventListener('click', (event) => {
+            event.stopPropagation(); // Prevent event bubbling
+            copyMenuSettingsFromColumn1(menuName);
+        });
+
+        // Setup tooltip for menu copy icon
+        setupTooltip(menuCopyIcon, menuCopyIcon.title);
+
+        menuContainer.appendChild(menuCopyIcon);
+        menuCell.appendChild(menuContainer);
         menuRow.appendChild(menuCell);
 
         // Add empty cells for each configuration
@@ -241,7 +459,38 @@ function renderSettingsTable() {
             settingRow.dataset.menu = menuName;
 
             const settingCell = document.createElement('td');
-            settingCell.textContent = settingName;
+
+            // If this setting has radio button options, add an arrow icon to copy from column 1 to others
+            if (hasOptions) {
+                const settingContainer = document.createElement('div');
+                settingContainer.className = 'setting-container';
+
+                const settingText = document.createElement('span');
+                settingText.textContent = settingName;
+                settingContainer.appendChild(settingText);
+
+                const arrowIcon = document.createElement('span');
+                arrowIcon.className = 'copy-setting-icon';
+                arrowIcon.innerHTML = '➡️';
+                arrowIcon.title = 'Copy this setting from column 1 to columns 2-4';
+                arrowIcon.dataset.menu = menuName;
+                arrowIcon.dataset.setting = settingName;
+
+                // Add event listener to copy this setting from column 1 to columns 2-4
+                arrowIcon.addEventListener('click', (event) => {
+                    event.stopPropagation(); // Prevent event bubbling
+                    copySettingFromColumn1(menuName, settingName);
+                });
+
+                // Setup tooltip for setting copy icon
+                setupTooltip(arrowIcon, arrowIcon.title);
+
+                settingContainer.appendChild(arrowIcon);
+                settingCell.appendChild(settingContainer);
+            } else {
+                settingCell.textContent = settingName;
+            }
+
             settingRow.appendChild(settingCell);
 
             // Add cells for each configuration's setting value
@@ -413,6 +662,12 @@ function renderSettingsTable() {
             column.classList.add('selected');
         });
     });
+
+    // Dispatch an event to indicate that the table has been rendered
+    document.dispatchEvent(new CustomEvent('tableRendered'));
+
+    // Update the visibility of copy icons based on the setting
+    updateCopyIconsVisibility();
 }
 
 // Toggle expansion of menu rows
@@ -480,6 +735,10 @@ function toggleConfigSection() {
     // Check if the section is currently expanded
     const isExpanded = !columnsContainer.classList.contains('collapsed');
 
+    // Update the global variable
+    showConfigSection = !isExpanded;
+
+    // Update the UI
     if (isExpanded) {
         // Collapse the section
         columnsContainer.classList.add('collapsed');
@@ -490,27 +749,15 @@ function toggleConfigSection() {
         toggleIcon.textContent = '-';
     }
 
-    // Save the state to localStorage for persistence
-    localStorage.setItem('configSectionExpanded', !isExpanded);
+    // Save the state to electron-store for persistence
+    saveSettings({ showConfigSection: !isExpanded });
 }
 
-// Initialize configuration section state from localStorage
+// Initialize configuration section state
 function initConfigSectionState() {
-    const columnsContainer = document.querySelector('.columns-container');
-    const toggleIcon = document.querySelector('.toggle-config-section');
-
-    // Get saved state from localStorage (default to expanded if not set)
-    const isExpanded = localStorage.getItem('configSectionExpanded') !== 'false';
-
-    if (!isExpanded) {
-        // Collapse the section
-        columnsContainer.classList.add('collapsed');
-        toggleIcon.textContent = '+';
-    } else {
-        // Expand the section (default)
-        columnsContainer.classList.remove('collapsed');
-        toggleIcon.textContent = '-';
-    }
+    // Note: The actual state will be initialized from electron-store via the getShowConfigSection() call
+    // This function is now just a placeholder that will be called before the state is loaded
+    // The updateCopyIconsVisibility function will handle the actual UI update once the state is loaded
 }
 
 // Event handlers for editable cells
@@ -763,6 +1010,271 @@ function copyColumnSettings(sourceColumnIndex, targetValue) {
     });
 }
 
+// Function to copy a specific setting from column 1 to columns 2-4
+function copySettingFromColumn1(menuName, settingName) {
+    // Get the value from column 1
+    const sourceConfig = configurations[0];
+
+    if (!sourceConfig || !sourceConfig[menuName] || !sourceConfig[menuName][settingName]) {
+        alert('Source setting is not available in column 1.');
+        return;
+    }
+
+    // Store the expansion state of menus before re-rendering
+    const expandedMenus = [];
+    document.querySelectorAll('.menu-row').forEach(menuRow => {
+        const expandIcon = menuRow.querySelector('.expand-icon');
+        if (expandIcon && expandIcon.textContent === '-') {
+            expandedMenus.push(menuRow.dataset.menu);
+        }
+    });
+
+    // Get the value to copy
+    const settingValue = sourceConfig[menuName][settingName];
+
+    // Copy to columns 2-4
+    for (let i = 1; i < 4; i++) {
+        // Ensure the menu exists in the target configuration
+        if (!configurations[i][menuName]) {
+            configurations[i][menuName] = {};
+        }
+
+        // Copy the setting value
+        configurations[i][menuName][settingName] = settingValue;
+
+        // Auto-save if the configuration has a file path
+        if (configFilePaths[i]) {
+            autoSaveConfiguration(i);
+        }
+    }
+
+    // Re-render the settings table to reflect the changes
+    renderSettingsTable();
+
+    // Restore the expansion state of menus after re-rendering
+    expandedMenus.forEach(menuName => {
+        const menuRow = document.querySelector(`.menu-row[data-menu="${menuName}"]`);
+        if (menuRow) {
+            const expandIcon = menuRow.querySelector('.expand-icon');
+            const settingRows = document.querySelectorAll(`.setting-row[data-menu="${menuName}"]`);
+
+            // Set icon to expanded state
+            if (expandIcon) {
+                expandIcon.textContent = '-';
+            }
+
+            // Show all setting rows for this menu
+            settingRows.forEach(row => {
+                row.classList.add('expanded');
+            });
+        }
+    });
+
+    // Show a confirmation message
+    alert(`Setting "${settingName}" copied from column 1 to columns 2-4.`);
+}
+
+// Function to copy all settings from a specific menu in column 1 to columns 2-4
+function copyMenuSettingsFromColumn1(menuName) {
+    // Get the source configuration
+    const sourceConfig = configurations[0];
+
+    if (!sourceConfig || !sourceConfig[menuName]) {
+        alert(`Menu "${menuName}" is not available in column 1.`);
+        return;
+    }
+
+    // Store the expansion state of menus before re-rendering
+    const expandedMenus = [];
+    document.querySelectorAll('.menu-row').forEach(menuRow => {
+        const expandIcon = menuRow.querySelector('.expand-icon');
+        if (expandIcon && expandIcon.textContent === '-') {
+            expandedMenus.push(menuRow.dataset.menu);
+        }
+    });
+
+    // Get all settings in this menu from column 1
+    const menuSettings = sourceConfig[menuName];
+
+    // Copy to columns 2-4
+    for (let i = 1; i < 4; i++) {
+        // Ensure the menu exists in the target configuration
+        if (!configurations[i][menuName]) {
+            configurations[i][menuName] = {};
+        }
+
+        // Copy all settings in this menu
+        for (const settingName in menuSettings) {
+            configurations[i][menuName][settingName] = JSON.parse(JSON.stringify(menuSettings[settingName]));
+        }
+
+        // Auto-save if the configuration has a file path
+        if (configFilePaths[i]) {
+            autoSaveConfiguration(i);
+        }
+    }
+
+    // Re-render the settings table to reflect the changes
+    renderSettingsTable();
+
+    // Restore the expansion state of menus after re-rendering
+    expandedMenus.forEach(menuName => {
+        const menuRow = document.querySelector(`.menu-row[data-menu="${menuName}"]`);
+        if (menuRow) {
+            const expandIcon = menuRow.querySelector('.expand-icon');
+            const settingRows = document.querySelectorAll(`.setting-row[data-menu="${menuName}"]`);
+
+            // Set icon to expanded state
+            if (expandIcon) {
+                expandIcon.textContent = '-';
+            }
+
+            // Show all setting rows for this menu
+            settingRows.forEach(row => {
+                row.classList.add('expanded');
+            });
+        }
+    });
+
+    // Show a confirmation message
+    alert(`All settings in "${menuName}" copied from column 1 to columns 2-4.`);
+}
+
+// Settings modal event handlers
+let settingsModalEventHandlersAttached = false;
+const settingsModalHandlers = {
+    closeButton: null,
+    windowClick: null,
+    rowCopyIconsSwitch: null,
+    menuCopyIconsSwitch: null,
+    configSectionSwitch: null
+};
+
+// Function to show the Settings modal
+function showSettingsModal() {
+    const settingsModal = document.getElementById('settings-modal');
+    const closeButton = settingsModal.querySelector('.close');
+    const rowCopyIconsSwitch = document.getElementById('show-row-copy-icons');
+    const menuCopyIconsSwitch = document.getElementById('show-menu-copy-icons');
+    const configSectionSwitch = document.getElementById('show-config-section');
+
+    // Initialize the switches with the current settings
+    rowCopyIconsSwitch.checked = showCopyIcons;
+    menuCopyIconsSwitch.checked = showMenuCopyIcons;
+    configSectionSwitch.checked = showConfigSection;
+
+    // Show the modal
+    settingsModal.style.display = 'block';
+
+    // Attach event handlers if not already attached
+    if (!settingsModalEventHandlersAttached) {
+        // Define event handlers
+        settingsModalHandlers.closeButton = () => {
+            settingsModal.style.display = 'none';
+        };
+
+        settingsModalHandlers.windowClick = (event) => {
+            if (event.target === settingsModal) {
+                settingsModal.style.display = 'none';
+            }
+        };
+
+        settingsModalHandlers.rowCopyIconsSwitch = () => {
+            const newValue = rowCopyIconsSwitch.checked;
+            saveSettings({ showCopyIcons: newValue });
+        };
+
+        settingsModalHandlers.menuCopyIconsSwitch = () => {
+            const newValue = menuCopyIconsSwitch.checked;
+            saveSettings({ showMenuCopyIcons: newValue });
+        };
+
+        settingsModalHandlers.configSectionSwitch = () => {
+            const newValue = configSectionSwitch.checked;
+            saveSettings({ showConfigSection: newValue });
+        };
+
+        // Attach event handlers
+        closeButton.addEventListener('click', settingsModalHandlers.closeButton);
+        window.addEventListener('click', settingsModalHandlers.windowClick);
+        rowCopyIconsSwitch.addEventListener('change', settingsModalHandlers.rowCopyIconsSwitch);
+        menuCopyIconsSwitch.addEventListener('change', settingsModalHandlers.menuCopyIconsSwitch);
+        configSectionSwitch.addEventListener('change', settingsModalHandlers.configSectionSwitch);
+
+        settingsModalEventHandlersAttached = true;
+    }
+}
+
+// Function to save settings
+async function saveSettings(settings) {
+    try {
+        const result = await window.api.saveSettings(settings);
+        if (!result.success) {
+            console.error('Failed to save settings:', result.message);
+        }
+    } catch (error) {
+        console.error('Error saving settings:', error);
+    }
+}
+
+// Function to show the About modal
+async function showAboutModal() {
+    const aboutModal = document.getElementById('about-modal');
+    const aboutContentElement = document.getElementById('about-content');
+
+    // Show the modal
+    aboutModal.style.display = 'block';
+
+    // Load the content if it hasn't been loaded yet
+    if (!aboutContent) {
+        try {
+            const result = await window.api.getAboutContent();
+            if (result.success) {
+                aboutContent = result.data;
+            } else {
+                aboutContent = 'Failed to load about content: ' + result.message;
+            }
+        } catch (error) {
+            aboutContent = 'Error loading about content: ' + error.message;
+        }
+    }
+
+    // Convert markdown to HTML (simple conversion for basic markdown)
+    let htmlContent = convertMarkdownToHtml(aboutContent);
+
+    // Set the content
+    aboutContentElement.innerHTML = htmlContent;
+}
+
+// Simple function to convert markdown to HTML
+function convertMarkdownToHtml(markdown) {
+    // Replace headers
+    let html = markdown
+        .replace(/^# (.*$)/gm, '<h1>$1</h1>')
+        .replace(/^## (.*$)/gm, '<h2>$1</h2>')
+        .replace(/^### (.*$)/gm, '<h3>$1</h3>')
+        .replace(/^#### (.*$)/gm, '<h4>$1</h4>');
+
+    // Replace bold text
+    html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+    // Replace bullet points
+    html = html.replace(/^\* (.*$)/gm, '<li>$1</li>');
+
+    // Wrap lists in <ul> tags
+    html = html.replace(/<li>.*?<\/li>/gs, function(match) {
+        return '<ul>' + match + '</ul>';
+    });
+
+    // Replace multiple <ul></ul> with a single pair
+    html = html.replace(/<\/ul>\s*<ul>/g, '');
+
+    // Replace newlines with <br> tags
+    html = html.replace(/\n/g, '<br>');
+
+    return html;
+}
+
 // Add some additional CSS for selected column, editable cells, and radio buttons
 document.head.insertAdjacentHTML('beforeend', `
 <style>
@@ -785,6 +1297,47 @@ document.head.insertAdjacentHTML('beforeend', `
         outline: none;
         background-color: #f0f0f0;
         border: 1px solid #0078d7;
+    }
+
+    /* Menu container with copy icon */
+    .menu-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .copy-menu-icon {
+        cursor: pointer;
+        margin-left: 8px;
+        opacity: 0.7;
+        transition: opacity 0.2s;
+        color: #e74c3c; /* Red color to distinguish from setting copy icon */
+        font-size: 16px;
+        position: relative;
+    }
+
+    .copy-menu-icon:hover {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+
+    /* Setting container with arrow icon */
+    .setting-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .copy-setting-icon {
+        cursor: pointer;
+        margin-left: 8px;
+        opacity: 0.7;
+        transition: opacity 0.2s;
+        position: relative;
+    }
+
+    .copy-setting-icon:hover {
+        opacity: 1;
     }
 
     /* Radio button styles */
@@ -811,6 +1364,47 @@ document.head.insertAdjacentHTML('beforeend', `
     .radio-label input[type="radio"]:checked + span {
         font-weight: bold;
         color: #0078d7;
+    }
+
+    /* Custom tooltip styles */
+    .custom-tooltip {
+        position: absolute;
+        background-color: #333;
+        color: #fff;
+        padding: 8px 12px;
+        border-radius: 4px;
+        font-size: 14px;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s, visibility 0.3s;
+        white-space: nowrap;
+        pointer-events: none;
+        bottom: 125%;
+        left: 50%;
+        transform: translateX(-50%);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    .custom-tooltip::after {
+        content: '';
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        margin-left: -5px;
+        border-width: 5px;
+        border-style: solid;
+        border-color: #333 transparent transparent transparent;
+    }
+
+    .custom-tooltip.show {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    /* Position the tooltip for send-to-icon */
+    .send-to-icon {
+        position: relative;
     }
 </style>
 `);
