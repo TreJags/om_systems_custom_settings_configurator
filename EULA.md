@@ -56,4 +56,4 @@ By installing, copying, or otherwise using the Software Product, you acknowledge
 **Contact Information:**  
 Trevor Jager  
 JTK Labs and Trevor Jager Photography  
-Email: [contact@jtklabs.com](mailto:contact@jtklabs.com)
+Email: [jtklabs@mchsi.com](mailto:jtklabs@mchsi.com)
