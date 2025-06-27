@@ -1,3 +1,11 @@
+/**
+ * OM-System Custom Settings Configurator
+ * 
+ * @author Trevor Jager
+ * @copyright (c) 2024 JTK Labs and Trevor Jager Photography. All rights reserved.
+ * @license All Rights Reserved
+ */
+
 const { app, BrowserWindow, ipcMain, dialog, Menu } = require('electron');
 const path = require('path');
 const fs = require('fs');
@@ -78,6 +86,12 @@ function createMenu() {
           label: 'About',
           click: () => {
             mainWindow.webContents.send('show-about');
+          }
+        },
+        {
+          label: 'License',
+          click: () => {
+            mainWindow.webContents.send('show-license');
           }
         }
       ]
@@ -198,6 +212,18 @@ ipcMain.handle('get-about-content', () => {
     return { success: true, data: aboutContent };
   } catch (error) {
     console.error('Error loading about content:', error);
+    return { success: false, message: error.message };
+  }
+});
+
+// Get license content
+ipcMain.handle('get-license-content', () => {
+  try {
+    const licenseContentPath = path.join(__dirname, 'EULA.md');
+    const licenseContent = fs.readFileSync(licenseContentPath, 'utf8');
+    return { success: true, data: licenseContent };
+  } catch (error) {
+    console.error('Error loading license content:', error);
     return { success: false, message: error.message };
   }
 });

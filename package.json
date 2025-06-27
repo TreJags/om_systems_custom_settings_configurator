@@ -11,7 +11,7 @@
     "build-win": "electron-builder --win --x64"
   },
   "build": {
-    "appId": "com.yourusername.om-systems-custom-settings-configurator",
+    "appId": "com.jtklabs.om-systems-custom-settings-configurator",
     "productName": "OM-System Custom Settings Configurator",
     "directories": {
       "output": "dist"
@@ -28,7 +28,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yourusername/om_systems_custom_settings_configurator.git"
+    "url": "git+https://github.com/TreJags/om_systems_custom_settings_configurator.git"
   },
   "keywords": [
     "OM-System",
@@ -37,12 +37,12 @@
     "configurator",
     "electron"
   ],
-  "author": "",
-  "license": "MIT",
+  "author": "Trevor Jager (JTK Labs and Trevor Jager Photography)",
+  "license": "UNLICENSED",
   "bugs": {
-    "url": "https://github.com/yourusername/om_systems_custom_settings_configurator/issues"
+    "url": "https://github.com/TreJags/om_systems_custom_settings_configurator/issues"
   },
-  "homepage": "https://github.com/yourusername/om_systems_custom_settings_configurator#readme",
+  "homepage": "https://github.com/TreJags/om_systems_custom_settings_configurator#readme",
   "devDependencies": {
     "electron": "^28.0.0",
     "electron-builder": "^24.6.4"

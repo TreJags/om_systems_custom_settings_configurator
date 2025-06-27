@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Trevor Jager, JTK Labs and Trevor Jager Photography">
     <title>OM-System Custom Settings Configurator</title>
     <style>
         body {
@@ -338,6 +339,17 @@
         </div>
     </div>
 
+    <!-- License Modal -->
+    <div id="license-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>End User License Agreement</h2>
+            <div id="license-content" class="about-content">
+                <!-- Content will be loaded dynamically -->
+            </div>
+        </div>
+    </div>
+
     <!-- Settings Modal -->
     <div id="settings-modal" class="modal">
         <div class="modal-content">
@@ -501,6 +513,10 @@
             </tbody>
         </table>
     </div>
+
+    <footer style="margin-top: 30px; text-align: center; font-size: 12px; color: #666; padding: 10px; border-top: 1px solid #eee;">
+        &copy; 2024 JTK Labs and Trevor Jager Photography. All rights reserved.
+    </footer>
 
     <script src="renderer.js"></script>
 </body>

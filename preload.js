@@ -1,7 +1,16 @@
+/**
+ * OM-System Custom Settings Configurator
+ * 
+ * @author Trevor Jager
+ * @copyright (c) 2024 JTK Labs and Trevor Jager Photography. All rights reserved.
+ * @license All Rights Reserved
+ */
+
 const { contextBridge, ipcRenderer } = require('electron');
 
 // Set up event listeners
 let aboutShowListener = null;
+let licenseShowListener = null;
 let toggleCopyIconsListener = null;
 let toggleMenuCopyIconsListener = null;
 let toggleConfigSectionListener = null;
@@ -26,6 +35,9 @@ contextBridge.exposeInMainWorld(
     getAboutContent: () => {
       return ipcRenderer.invoke('get-about-content');
     },
+    getLicenseContent: () => {
+      return ipcRenderer.invoke('get-license-content');
+    },
     onShowAbout: (callback) => {
       // Remove previous listener if it exists
       if (aboutShowListener) {
@@ -35,6 +47,16 @@ contextBridge.exposeInMainWorld(
       // Set up new listener
       aboutShowListener = () => callback();
       ipcRenderer.on('show-about', aboutShowListener);
+    },
+    onShowLicense: (callback) => {
+      // Remove previous listener if it exists
+      if (licenseShowListener) {
+        ipcRenderer.removeListener('show-license', licenseShowListener);
+      }
+
+      // Set up new listener
+      licenseShowListener = () => callback();
+      ipcRenderer.on('show-license', licenseShowListener);
     },
     onToggleCopyIcons: (callback) => {
       // Remove previous listener if it exists

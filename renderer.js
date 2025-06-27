@@ -1,8 +1,17 @@
+/**
+ * OM-System Custom Settings Configurator
+ * 
+ * @author Trevor Jager
+ * @copyright (c) 2024 JTK Labs and Trevor Jager Photography. All rights reserved.
+ * @license All Rights Reserved
+ */
+
 // Global state to store configurations
 let configurations = [null, null, null, null];
 let configFilePaths = ['', '', '', ''];
 let menuStructure = null; // Store the menu structure from the configuration file
 let aboutContent = null; // Store the about content
+let licenseContent = null; // Store the license content
 let showCopyIcons = true; // Default to showing row copy icons
 let showMenuCopyIcons = true; // Default to showing menu copy icons
 let showConfigSection = true; // Default to showing configuration selection boxes
@@ -26,10 +35,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // About modal functionality
     const aboutModal = document.getElementById('about-modal');
-    const closeButton = aboutModal.querySelector('.close');
+    const aboutCloseButton = aboutModal.querySelector('.close');
 
     // Close the modal when the close button is clicked
-    closeButton.addEventListener('click', () => {
+    aboutCloseButton.addEventListener('click', () => {
         aboutModal.style.display = 'none';
     });
 
@@ -40,9 +49,30 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // License modal functionality
+    const licenseModal = document.getElementById('license-modal');
+    const licenseCloseButton = licenseModal.querySelector('.close');
+
+    // Close the modal when the close button is clicked
+    licenseCloseButton.addEventListener('click', () => {
+        licenseModal.style.display = 'none';
+    });
+
+    // Close the modal when clicking outside of it
+    window.addEventListener('click', (event) => {
+        if (event.target === licenseModal) {
+            licenseModal.style.display = 'none';
+        }
+    });
+
     // Listen for show-about event from main process
     window.api.onShowAbout(() => {
         showAboutModal();
+    });
+
+    // Listen for show-license event from main process
+    window.api.onShowLicense(() => {
+        showLicenseModal();
     });
 
     // Add a button to show the Settings modal
@@ -56,6 +86,12 @@ document.addEventListener('DOMContentLoaded', () => {
     aboutButton.textContent = 'About';
     aboutButton.addEventListener('click', showAboutModal);
     document.querySelector('.actions').appendChild(aboutButton);
+
+    // Add a button to show the License modal
+    const licenseButton = document.createElement('button');
+    licenseButton.textContent = 'License';
+    licenseButton.addEventListener('click', showLicenseModal);
+    document.querySelector('.actions').appendChild(licenseButton);
 
     // Column-specific load/save buttons
     const loadButtons = document.querySelectorAll('.load-column');
@@ -1244,6 +1280,35 @@ async function showAboutModal() {
 
     // Set the content
     aboutContentElement.innerHTML = htmlContent;
+}
+
+// Function to show the License modal
+async function showLicenseModal() {
+    const licenseModal = document.getElementById('license-modal');
+    const licenseContentElement = document.getElementById('license-content');
+
+    // Show the modal
+    licenseModal.style.display = 'block';
+
+    // Load the content if it hasn't been loaded yet
+    if (!licenseContent) {
+        try {
+            const result = await window.api.getLicenseContent();
+            if (result.success) {
+                licenseContent = result.data;
+            } else {
+                licenseContent = 'Failed to load license content: ' + result.message;
+            }
+        } catch (error) {
+            licenseContent = 'Error loading license content: ' + error.message;
+        }
+    }
+
+    // Convert markdown to HTML (simple conversion for basic markdown)
+    let htmlContent = convertMarkdownToHtml(licenseContent);
+
+    // Set the content
+    licenseContentElement.innerHTML = htmlContent;
 }
 
 // Simple function to convert markdown to HTML

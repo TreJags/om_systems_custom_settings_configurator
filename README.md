@@ -18,7 +18,7 @@ A desktop application built with Electron that allows users to view and manage m
 
 1. Clone this repository:
 ```
-git clone https://github.com/yourusername/om_systems_custom_settings_configurator.git
+git clone https://github.com/TreJags/om_systems_custom_settings_configurator.git
 ```
 
 2. Navigate to the project directory:
@@ -145,3 +145,16 @@ Or create a distributable package for the current platform:
 ```
 npm run dist
 ```
+
+## Author
+
+This application was developed by Trevor Jager.
+
+## License and Copyright
+
+© 2024 JTK Labs and Trevor Jager Photography. All rights reserved.
+This software is proprietary and confidential. Unauthorized copying, distribution, or use is strictly prohibited. See the [LICENSE](LICENSE) file for details.
+
+## End User License Agreement
+
+This software is distributed under an End User License Agreement (EULA). By using this software, you agree to the terms and conditions outlined in the [EULA](EULA.md) file.
